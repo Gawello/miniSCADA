@@ -13,7 +13,7 @@ ClientWindow::ClientWindow(QWidget *parent) : QMainWindow(parent) {
 
     chartWidget = new ChartWidget(this);
 
-    // Dodajemy domyślne wykresy
+    // Dodaje domyślne wykresy
     chartWidget->addChart("Temperatura (°C)", 0, 50);
     chartWidget->addChart("Wilgotność (%)", 0, 100);
     chartWidget->addChart("Ciśnienie (hPa)", 900, 1100);
@@ -49,7 +49,7 @@ void ClientWindow::updateData(const QString &data) {
         double value = obj[key].toDouble();
 
         if (!knownSensors.contains(key)) {
-            knownSensors.insert(key); // Zapisujemy nowy czujnik
+            knownSensors.insert(key); // Zapisuje nowy czujnik
         }
 
         chartWidget->addData(key, value);

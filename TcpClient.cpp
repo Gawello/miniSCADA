@@ -5,7 +5,7 @@
 TcpClient::TcpClient(QObject *parent) : QObject(parent) {
     socket = new QTcpSocket(this);
     connect(socket, &QTcpSocket::readyRead, this, &TcpClient::readData);
-    connectToServer("192.168.1.100", 12345); // Ustaw IP Raspberry Pi
+    connectToServer("192.168.1.203", 12345); // Ustaw IP Raspberry Pi
 }
 
 void TcpClient::connectToServer(const QString &host, int port) {

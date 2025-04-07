@@ -65,23 +65,30 @@ void ClientWindow::saveCSV() {
 
 void ClientWindow::openSettings() {
     QStringList unusedSensors = getUnusedSensors();
-    SettingsDialog dialog(unusedSensors, this);
+    QStringList existingCharts = chartWidget->getChartTitles(); // nowa metoda
+
+    SettingsDialog dialog(unusedSensors, existingCharts, this);
 
     if (dialog.exec() == QDialog::Accepted) {
-        QString selectedSensor = dialog.getSelectedSensor();
-        if (!selectedSensor.isEmpty()) {
-            chartWidget->addChart(selectedSensor, 0, 100);
+        QString chartToEdit = dialog.getChartToEdit();        // istniejący wykres
+        QString newSensor = dialog.getSelectedSensor();       // nowy czujnik
+        QString chartType = dialog.getSelectedChartType();
+        double minY = dialog.getMinY();
+        double maxY = dialog.getMaxY();
+        int interval = dialog.getUpdateInterval();
+
+        if (!newSensor.isEmpty() && !chartWidget->hasChart(newSensor)) {
+            chartWidget->addChart(newSensor, minY, maxY);
+            chartWidget->changeChartType(newSensor, chartType);
         }
+
+        if (!chartToEdit.isEmpty()) {
+            chartWidget->setAxisRange(chartToEdit, minY, maxY);
+            chartWidget->changeChartType(chartToEdit, chartType);
+        }
+
+        tcpClient->setUpdateInterval(interval);
     }
-
-    QString selectedSensor = dialog.getSelectedSensor();
-    QString chartType = dialog.getSelectedChartType();
-
-    if (!selectedSensor.isEmpty()) {
-        chartWidget->addChart(selectedSensor, 0, 100);
-        chartWidget->changeChartType(selectedSensor, chartType);
-    }
-
 }
 
 QStringList ClientWindow::getUnusedSensors() const {

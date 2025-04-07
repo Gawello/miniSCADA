@@ -1,6 +1,8 @@
 #include "SettingsDialog.h"
 
-SettingsDialog::SettingsDialog(const QStringList &availableSensors, QWidget *parent)
+SettingsDialog::SettingsDialog(const QStringList &availableSensors,
+                               const QStringList &existingCharts,
+                               QWidget *parent)
     : QDialog(parent) {
     setWindowTitle("Ustawienia");
 
@@ -25,6 +27,10 @@ SettingsDialog::SettingsDialog(const QStringList &availableSensors, QWidget *par
     layout->addRow("Minimalna wartość Y:", minYSpinBox);
     layout->addRow("Maksymalna wartość Y:", maxYSpinBox);
     layout->addRow("Nowy czujnik do dodania:", sensorComboBox);
+
+    editChartComboBox = new QComboBox(this);
+    editChartComboBox->addItems(existingCharts);
+    layout->addRow("Edytuj wykres:", editChartComboBox);
 
     chartTypeComboBox = new QComboBox(this);
     chartTypeComboBox->addItems({"Line", "Scatter"});
@@ -54,4 +60,9 @@ QString SettingsDialog::getSelectedSensor() const {
 QString SettingsDialog::getSelectedChartType() const {
     return chartTypeComboBox->currentText();
 }
+
+QString SettingsDialog::getChartToEdit() const {
+    return editChartComboBox->currentText();
+}
+
 

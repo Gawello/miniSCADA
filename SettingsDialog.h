@@ -12,12 +12,16 @@ class SettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit SettingsDialog(const QStringList &availableSensors, QWidget *parent = nullptr);
+    explicit SettingsDialog(const QStringList &availableSensors,
+                            const QStringList &existingCharts,
+                            QWidget *parent = nullptr);
     int getUpdateInterval() const;
     double getMinY() const;
     double getMaxY() const;
     QString getSelectedSensor() const; // Zwraca wybrany nowy czujnik
     QString getSelectedChartType() const;
+    QComboBox *editChartComboBox;
+    QString getChartToEdit() const;
 
 private:
     QSpinBox *updateIntervalSpinBox;
@@ -25,7 +29,6 @@ private:
     QDoubleSpinBox *maxYSpinBox;
     QComboBox *sensorComboBox; // Lista dostępnych czujników
     QComboBox *chartTypeComboBox;
-
 
 };
 

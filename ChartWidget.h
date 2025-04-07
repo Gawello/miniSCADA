@@ -17,9 +17,10 @@ public:
     void addData(const QString &chartTitle, double value);
     void clearAllCharts();
     void saveToCSV(const QString &filePath);
-    void setAxisRange(double minY, double maxY);
+    void setAxisRange(const QString &chartTitle, double minY, double maxY);
     bool hasChart(const QString &title);
     void changeChartType(const QString &chartTitle, const QString &typeName);
+    QStringList getChartTitles() const;
 
 
 private:

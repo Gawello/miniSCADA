@@ -42,15 +42,22 @@ void ChartWidget::saveToCSV(const QString &filePath) {
     out << "\n";
 
     int maxDataPoints = 0;
+
+    // Ustal maksymalną długość serii
     for (const auto &chart : charts) {
-        maxDataPoints = qMax(maxDataPoints, chart->getSeries()->count());
+        auto xySeries = qobject_cast<QXYSeries*>(chart->getSeries());
+        if (xySeries) {
+            maxDataPoints = qMax(maxDataPoints, xySeries->count());
+        }
     }
 
+    // Zapisujemy dane do pliku
     for (int i = 0; i < maxDataPoints; i++) {
         out << i;
         for (const auto &chart : charts) {
-            if (i < chart->getSeries()->count()) {
-                out << "," << chart->getSeries()->at(i).y();
+            auto xySeries = qobject_cast<QXYSeries*>(chart->getSeries());
+            if (xySeries && i < xySeries->count()) {
+                out << "," << xySeries->at(i).y();
             } else {
                 out << ",";
             }
@@ -72,3 +79,17 @@ bool ChartWidget::hasChart(const QString &title) {
 }
 
 
+void ChartWidget::changeChartType(const QString &chartTitle, const QString &typeName) {
+    if (!charts.contains(chartTitle)) return;
+
+    SensorChart::ChartType type;
+
+    if (typeName == "Line")
+        type = SensorChart::ChartType::Line;
+    else if (typeName == "Scatter")
+        type = SensorChart::ChartType::Scatter;
+    else
+        return;
+
+    charts[chartTitle]->changeType(type);
+}

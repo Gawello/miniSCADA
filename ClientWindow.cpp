@@ -73,6 +73,15 @@ void ClientWindow::openSettings() {
             chartWidget->addChart(selectedSensor, 0, 100);
         }
     }
+
+    QString selectedSensor = dialog.getSelectedSensor();
+    QString chartType = dialog.getSelectedChartType();
+
+    if (!selectedSensor.isEmpty()) {
+        chartWidget->addChart(selectedSensor, 0, 100);
+        chartWidget->changeChartType(selectedSensor, chartType);
+    }
+
 }
 
 QStringList ClientWindow::getUnusedSensors() const {

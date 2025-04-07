@@ -30,12 +30,21 @@ SensorChart::SensorChart(const QString &title, double minY, double maxY, QWidget
 }
 
 void SensorChart::addDataPoint(double value) {
+    auto xySeries = qobject_cast<QXYSeries*>(series);
+    if (!xySeries) return; // bezpieczeństwo
+
     if (dataCount > 1000) {
-        series->remove(0);
+        // Usuwamy najstarszy punkt
+        QList<QPointF> points = xySeries->points();
+        if (!points.isEmpty()) {
+            points.removeFirst();
+        }
+        xySeries->replace(points); // zamieniamy całą serię nową listą
     } else {
         dataCount++;
     }
-    series->append(dataCount, value);
+
+    xySeries->append(dataCount, value);
 
     axisX->setMax(dataCount);
     axisX->setMin(qMax(0, dataCount - 100));
@@ -45,7 +54,10 @@ void SensorChart::addDataPoint(double value) {
 }
 
 void SensorChart::clearChart() {
-    series->clear();
+    auto xySeries = qobject_cast<QXYSeries*>(series);
+    if (xySeries) {
+        xySeries->clear();
+    }
     dataCount = 0;
 }
 
@@ -54,11 +66,45 @@ QChartView* SensorChart::getChartView() const {
 }
 
 
-QLineSeries* SensorChart::getSeries() const {
+QAbstractSeries* SensorChart::getSeries() const {
     return series;
 }
 
 
 QValueAxis* SensorChart::getAxisY() const {
     return axisY;
+}
+
+void SensorChart::changeType(ChartType newType) {
+    // 1. Skopiuj dane z obecnej serii
+    QList<QPointF> oldPoints;
+    if (auto line = qobject_cast<QLineSeries*>(series)) {
+        oldPoints = line->points();
+    } else if (auto scatter = qobject_cast<QScatterSeries*>(series)) {
+        oldPoints = scatter->points();
+    }
+
+    // 2. Usuń starą serię z wykresu
+    chart->removeSeries(series);
+    delete series;
+
+    // 3. Utwórz nową serię wybranego typu
+    switch (newType) {
+    case ChartType::Line:
+        series = new QLineSeries();
+        break;
+    case ChartType::Scatter:
+        series = new QScatterSeries();
+        break;
+    }
+
+    // 4. Dodaj punkty do nowej serii
+    for (const QPointF &point : oldPoints) {
+        static_cast<QXYSeries*>(series)->append(point);
+    }
+
+    // 5. Podłącz serię do wykresu i osi
+    chart->addSeries(series);
+    series->attachAxis(axisX);
+    series->attachAxis(axisY);
 }

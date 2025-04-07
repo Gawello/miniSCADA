@@ -19,6 +19,8 @@ public:
     void saveToCSV(const QString &filePath);
     void setAxisRange(double minY, double maxY);
     bool hasChart(const QString &title);
+    void changeChartType(const QString &chartTitle, const QString &typeName);
+
 
 private:
     QVBoxLayout *layout;

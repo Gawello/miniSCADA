@@ -7,6 +7,7 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QChart>
+#include <QScatterSeries>
 
 class SensorChart : public QWidget {
     Q_OBJECT
@@ -16,13 +17,16 @@ public:
     void addDataPoint(double value);
     void clearChart();
     QChartView* getChartView() const; // Getter do wyświetlenia wykresu w GUI
-    QLineSeries* getSeries() const;
+    QAbstractSeries* getSeries() const;
     QValueAxis* getAxisY() const;
+    enum class ChartType {Line, Scatter};
+    void changeType(ChartType newType);
 
 private:
     QChart *chart;
     QChartView *chartView;
-    QLineSeries *series;
+    QAbstractSeries *series;
+    // QLineSeries *series; // Wersja ze stałymi wykresami
     QValueAxis *axisX, *axisY;
     int dataCount;
 };

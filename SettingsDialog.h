@@ -16,13 +16,17 @@ public:
     int getUpdateInterval() const;
     double getMinY() const;
     double getMaxY() const;
-    QString getSelectedSensor() const; // ✅ Zwraca wybrany nowy czujnik
+    QString getSelectedSensor() const; // Zwraca wybrany nowy czujnik
+    QString getSelectedChartType() const;
 
 private:
     QSpinBox *updateIntervalSpinBox;
     QDoubleSpinBox *minYSpinBox;
     QDoubleSpinBox *maxYSpinBox;
-    QComboBox *sensorComboBox; // ✅ Lista dostępnych czujników
+    QComboBox *sensorComboBox; // Lista dostępnych czujników
+    QComboBox *chartTypeComboBox;
+
+
 };
 
 #endif // SETTINGSDIALOG_H

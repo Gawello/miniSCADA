@@ -26,6 +26,10 @@ SettingsDialog::SettingsDialog(const QStringList &availableSensors, QWidget *par
     layout->addRow("Maksymalna wartość Y:", maxYSpinBox);
     layout->addRow("Nowy czujnik do dodania:", sensorComboBox);
 
+    chartTypeComboBox = new QComboBox(this);
+    chartTypeComboBox->addItems({"Line", "Scatter"});
+    layout->addRow("Typ wykresu:", chartTypeComboBox);
+
     QPushButton *okButton = new QPushButton("OK", this);
     connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
     layout->addWidget(okButton);
@@ -46,3 +50,8 @@ double SettingsDialog::getMaxY() const {
 QString SettingsDialog::getSelectedSensor() const {
     return sensorComboBox->currentText();
 }
+
+QString SettingsDialog::getSelectedChartType() const {
+    return chartTypeComboBox->currentText();
+}
+

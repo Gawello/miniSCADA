@@ -15,6 +15,11 @@ SensorChart::SensorChart(const QString &title, double minY, double maxY, QWidget
     axisX->setRange(0, 100);
     axisX->setLabelFormat("%d");
     axisX->setTitleText("Pomiar");
+    connect(axisX, &QValueAxis::rangeChanged, this, [this](qreal min, qreal max) {
+        Q_UNUSED(min);
+        Q_UNUSED(max);
+        userXRangeActive = true;
+    });
 
     axisY = new QValueAxis();
     axisY->setRange(minY, maxY);
@@ -29,29 +34,39 @@ SensorChart::SensorChart(const QString &title, double minY, double maxY, QWidget
     chartView->setRenderHint(QPainter::Antialiasing);
 }
 
+void SensorChart::resetAutoScroll() {
+    userXRangeActive = false;
+}
+
+
 void SensorChart::addDataPoint(double value) {
     auto xySeries = qobject_cast<QXYSeries*>(series);
-    if (!xySeries) return; // bezpieczeństwo
+    if (!xySeries) return;
 
-    if (dataCount > 1000) {
-        // Usuwamy najstarszy punkt
-        QList<QPointF> points = xySeries->points();
-        if (!points.isEmpty()) {
-            points.removeFirst();
-        }
-        xySeries->replace(points); // zamieniamy całą serię nową listą
-    } else {
-        dataCount++;
-    }
+    dataCount++;
 
+    // Dodaj nowy punkt
     xySeries->append(dataCount, value);
 
-    axisX->setMax(dataCount);
-    axisX->setMin(qMax(0, dataCount - 100));
+    // Usuń nadmiar danych
+    const int maxPoints = 1000;
+    if (xySeries->count() > maxPoints) {
+        QList<QPointF> points = xySeries->points();
+        points.removeFirst(); // usuwamy najstarszy punkt
+        xySeries->replace(points);
+    }
 
+    // Jeśli użytkownik nie przesunął widoku, auto-przewijaj
+    if (!userXRangeActive) {
+        axisX->setMax(dataCount);
+        axisX->setMin(qMax(0, dataCount - 100));
+    }
+
+    // Skalowanie Y w czasie rzeczywistym
     if (value > axisY->max()) axisY->setMax(value + 5);
     if (value < axisY->min()) axisY->setMin(value - 5);
 }
+
 
 void SensorChart::clearChart() {
     auto xySeries = qobject_cast<QXYSeries*>(series);

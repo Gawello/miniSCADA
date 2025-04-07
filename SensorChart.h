@@ -21,6 +21,8 @@ public:
     QValueAxis* getAxisY() const;
     enum class ChartType {Line, Scatter};
     void changeType(ChartType newType);
+    bool userXRangeActive = false;
+    void resetAutoScroll();
 
 private:
     QChart *chart;

@@ -21,6 +21,7 @@ SettingsDialog::SettingsDialog(const QStringList &availableSensors,
     maxYSpinBox->setValue(100);
 
     sensorComboBox = new QComboBox(this);
+    sensorComboBox->addItem(" ");
     sensorComboBox->addItems(availableSensors);
 
     layout->addRow("Interwał odświeżania (ms):", updateIntervalSpinBox);
@@ -29,6 +30,7 @@ SettingsDialog::SettingsDialog(const QStringList &availableSensors,
     layout->addRow("Nowy czujnik do dodania:", sensorComboBox);
 
     editChartComboBox = new QComboBox(this);
+    editChartComboBox->addItem(" ");
     editChartComboBox->addItems(existingCharts);
     layout->addRow("Edytuj wykres:", editChartComboBox);
 

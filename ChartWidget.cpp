@@ -69,12 +69,12 @@ void ChartWidget::saveToCSV(const QString &filePath) {
 }
 
 void ChartWidget::setAxisRange(const QString &chartTitle, double minY, double maxY) {
-    if (charts.contains(chartTitle)) {
-        charts[chartTitle]->getAxisY()->setRange(minY, maxY);
-    }
     if (!charts.contains(chartTitle)) {
         qDebug() << "Brak wykresu o nazwie:" << chartTitle;
         return;
+    }
+    if (charts.contains(chartTitle)) {
+        charts[chartTitle]->getAxisY()->setRange(minY, maxY);
     }
 }
 

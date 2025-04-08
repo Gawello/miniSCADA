@@ -4,7 +4,7 @@ import time
 import requests
 
 # === KONFIGURACJA ===
-API_KEY = "b167be5cc3c2d9d3915ab25dbdff2726"  # Zamień na własny klucz API z OpenWeatherMap
+API_KEY = ""  # Zamień na własny klucz API z OpenWeatherMap
 CITY = "Warsaw"  # Miasto, dla którego pobieramy pogodę
 SERVER_IP = "192.168.0.3"  # Adres IP Twojego komputera
 SERVER_PORT = 12345  # Port na którym działa serwer

@@ -102,3 +102,16 @@ QStringList ChartWidget::getChartTitles() const {
     return charts.keys();
 }
 
+void ChartWidget::setChartColor(const QString &chartTitle, const QColor &color) {
+    if (!charts.contains(chartTitle)) return;
+
+    charts[chartTitle]->setSeriesColor(color);
+}
+
+void ChartWidget::setChartStyle(const QString &chartTitle, Qt::PenStyle style, int width) {
+    if (!charts.contains(chartTitle)) return;
+
+    charts[chartTitle]->setSeriesStyle(style, width);
+}
+
+

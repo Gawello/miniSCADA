@@ -23,6 +23,9 @@ public:
     void changeType(ChartType newType);
     bool userXRangeActive = false;
     void resetAutoScroll();
+    void setSeriesColor(const QColor &color);
+    void setSeriesStyle(Qt::PenStyle style, int width);
+
 
 private:
     QChart *chart;

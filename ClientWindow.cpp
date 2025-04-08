@@ -1,4 +1,5 @@
 #include "ClientWindow.h"
+#include "ChartEditorDialog.h"
 #include <QVBoxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -27,6 +28,23 @@ ClientWindow::ClientWindow(QWidget *parent) : QMainWindow(parent) {
 
     settingsButton = new QPushButton("Ustawienia", this);
     connect(settingsButton, &QPushButton::clicked, this, &ClientWindow::openSettings);
+    ChartEditorDialog *editor = new ChartEditorDialog(chartWidget->getChartTitles(), this);
+
+    connect(editor, &ChartEditorDialog::chartUpdated, this,
+            [=](const QString &title,
+                const QString &type,
+                const QColor &color,
+                Qt::PenStyle style,
+                int width,
+                double minY,
+                double maxY) {
+                chartWidget->changeChartType(title, type);
+                chartWidget->setChartColor(title, color);
+                chartWidget->setChartStyle(title, style, width);
+                chartWidget->setAxisRange(title, minY, maxY);
+            });
+
+    editor->exec();
 
     layout->addWidget(chartWidget);
     layout->addWidget(saveButton);
@@ -67,7 +85,7 @@ void ClientWindow::openSettings() {
     QStringList unusedSensors = getUnusedSensors();
     QStringList existingCharts = chartWidget->getChartTitles(); // nowa metoda
 
-    SettingsDialog dialog(unusedSensors, existingCharts, this);
+    SettingsDialog dialog(unusedSensors, chartWidget->getChartTitles(), chartWidget, this);
 
     if (dialog.exec() == QDialog::Accepted) {
         QString chartToEdit = dialog.getChartToEdit();        // istniejący wykres
@@ -89,6 +107,8 @@ void ClientWindow::openSettings() {
 
         tcpClient->setUpdateInterval(interval);
     }
+
+    auto editor = new ChartEditorDialog(chartWidget->getChartTitles(), this);
 }
 
 QStringList ClientWindow::getUnusedSensors() const {
@@ -99,4 +119,22 @@ QStringList ClientWindow::getUnusedSensors() const {
         }
     }
     return unused;
+}
+
+void ClientWindow::openChartEditor() {
+    ChartEditorDialog *editor = new ChartEditorDialog(chartWidget->getChartTitles(), this);
+    connect(editor, &ChartEditorDialog::chartUpdated, this,
+            [=](const QString &title,
+                const QString &type,
+                const QColor &color,
+                Qt::PenStyle style,
+                int width,
+                double minY,
+                double maxY) {
+                chartWidget->changeChartType(title, type);
+                chartWidget->setChartColor(title, color);
+                chartWidget->setChartStyle(title, style, width);
+                chartWidget->setAxisRange(title, minY, maxY);
+            });
+    editor->exec();
 }

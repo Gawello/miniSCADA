@@ -21,7 +21,8 @@ public:
     bool hasChart(const QString &title);
     void changeChartType(const QString &chartTitle, const QString &typeName);
     QStringList getChartTitles() const;
-
+    void setChartColor(const QString &chartTitle, const QColor &color);
+    void setChartStyle(const QString &chartTitle, Qt::PenStyle style, int width);
 
 private:
     QVBoxLayout *layout;

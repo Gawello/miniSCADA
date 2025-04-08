@@ -10,16 +10,20 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ChartEditorDialog.cpp \
     ChartWidget.cpp \
     ClientWindow.cpp \
+    InfoPanel.cpp \
     SensorChart.cpp \
     SettingsDialog.cpp \
     TcpClient.cpp \
     main.cpp
 
 HEADERS += \
+    ChartEditorDialog.h \
     ChartWidget.h \
     ClientWindow.h \
+    InfoPanel.h \
     SensorChart.h \
     SettingsDialog.h \
     TcpClient.h

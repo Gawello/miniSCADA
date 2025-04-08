@@ -13,6 +13,7 @@ class ClientWindow : public QMainWindow {
 public:
     explicit ClientWindow(QWidget *parent = nullptr);
     ~ClientWindow();
+    void openChartEditor();
 
 private slots:
     void updateData(const QString &data);

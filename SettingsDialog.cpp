@@ -1,9 +1,12 @@
 #include "SettingsDialog.h"
+#include "ChartEditorDialog.h"
 
-SettingsDialog::SettingsDialog(const QStringList &availableSensors,
-                               const QStringList &existingCharts,
-                               QWidget *parent)
-    : QDialog(parent) {
+SettingsDialog::SettingsDialog::SettingsDialog(const QStringList &availableSensors,
+                                               const QStringList &existingCharts,
+                                               ChartWidget *chartWidgetRef,
+                                               QWidget *parent)
+    : QDialog(parent),
+    chartWidget(chartWidgetRef) {
     setWindowTitle("Ustawienia");
 
     QFormLayout *layout = new QFormLayout(this);
@@ -33,6 +36,23 @@ SettingsDialog::SettingsDialog(const QStringList &availableSensors,
     editChartComboBox->addItem(" ");
     editChartComboBox->addItems(existingCharts);
     layout->addRow("Edytuj wykres:", editChartComboBox);
+
+    QPushButton *editChartsBtn = new QPushButton("Edytuj wykresy", this);
+    QPushButton *editPanelsBtn = new QPushButton("Edytuj pola danych", this);
+    QPushButton *editControlsBtn = new QPushButton("Edytuj kontrolki", this);
+
+    layout->addWidget(editChartsBtn);
+    layout->addWidget(editPanelsBtn);
+    layout->addWidget(editControlsBtn);
+
+    connect(editChartsBtn, &QPushButton::clicked, this, [this]() {
+        ChartEditorDialog *dialog = new ChartEditorDialog(chartWidget->getChartTitles(), this);
+        dialog->exec();
+    });
+    connect(editChartsBtn, &QPushButton::clicked, this, [this]() {
+        ChartEditorDialog *dialog = new ChartEditorDialog(chartWidget->getChartTitles(), this);
+        dialog->exec();
+    });
 
     chartTypeComboBox = new QComboBox(this);
     chartTypeComboBox->addItems({"Line", "Scatter"});

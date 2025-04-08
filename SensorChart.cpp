@@ -123,3 +123,22 @@ void SensorChart::changeType(ChartType newType) {
     series->attachAxis(axisX);
     series->attachAxis(axisY);
 }
+
+void SensorChart::setSeriesColor(const QColor &color) {
+    auto xy = qobject_cast<QXYSeries*>(series);
+    if (xy) {
+        QPen pen = xy->pen();
+        pen.setColor(color);
+        xy->setPen(pen);
+    }
+}
+
+void SensorChart::setSeriesStyle(Qt::PenStyle style, int width) {
+    auto xy = qobject_cast<QXYSeries*>(series);
+    if (xy) {
+        QPen pen = xy->pen();
+        pen.setStyle(style);
+        pen.setWidth(width);
+        xy->setPen(pen);
+    }
+}

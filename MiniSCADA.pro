@@ -15,6 +15,7 @@ SOURCES += \
     ClientWindow.cpp \
     InfoPanel.cpp \
     SensorChart.cpp \
+    SensorSelectionDialog.cpp \
     SettingsDialog.cpp \
     TcpClient.cpp \
     main.cpp
@@ -25,6 +26,7 @@ HEADERS += \
     ClientWindow.h \
     InfoPanel.h \
     SensorChart.h \
+    SensorSelectionDialog.h \
     SettingsDialog.h \
     TcpClient.h
 

@@ -8,6 +8,7 @@
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QChart>
 #include <QScatterSeries>
+#include <QTimer>
 
 class SensorChart : public QWidget {
     Q_OBJECT
@@ -25,6 +26,8 @@ public:
     void resetAutoScroll();
     void setSeriesColor(const QColor &color);
     void setSeriesStyle(Qt::PenStyle style, int width);
+    void enableAutoScroll();
+    QTimer *autoScrollResetTimer;
 
 
 private:

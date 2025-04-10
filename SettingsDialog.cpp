@@ -1,7 +1,8 @@
 #include "SettingsDialog.h"
 #include "ChartEditorDialog.h"
 
-SettingsDialog::SettingsDialog::SettingsDialog(const QStringList &availableSensors,
+
+SettingsDialog::SettingsDialog(const QStringList &availableSensors,
                                                const QStringList &existingCharts,
                                                ChartWidget *chartWidgetRef,
                                                QWidget *parent)
@@ -15,27 +16,11 @@ SettingsDialog::SettingsDialog::SettingsDialog(const QStringList &availableSenso
     updateIntervalSpinBox->setRange(100, 5000);
     updateIntervalSpinBox->setValue(1000);
 
-    minYSpinBox = new QDoubleSpinBox(this);
-    minYSpinBox->setRange(-1000, 1000);
-    minYSpinBox->setValue(0);
-
-    maxYSpinBox = new QDoubleSpinBox(this);
-    maxYSpinBox->setRange(-1000, 1000);
-    maxYSpinBox->setValue(100);
-
-    sensorComboBox = new QComboBox(this);
-    sensorComboBox->addItem(" ");
-    sensorComboBox->addItems(availableSensors);
-
     layout->addRow("Interwał odświeżania (ms):", updateIntervalSpinBox);
-    layout->addRow("Minimalna wartość Y:", minYSpinBox);
-    layout->addRow("Maksymalna wartość Y:", maxYSpinBox);
-    layout->addRow("Nowy czujnik do dodania:", sensorComboBox);
 
-    editChartComboBox = new QComboBox(this);
-    editChartComboBox->addItem(" ");
-    editChartComboBox->addItems(existingCharts);
-    layout->addRow("Edytuj wykres:", editChartComboBox);
+    this->availableSensors = availableSensors;
+    QPushButton *selectSensorsButton = new QPushButton("Wybierz czujniki do dodania", this);
+    layout->addRow("Nowe czujniki:", selectSensorsButton);
 
     QPushButton *editChartsBtn = new QPushButton("Edytuj wykresy", this);
     QPushButton *editPanelsBtn = new QPushButton("Edytuj pola danych", this);
@@ -49,14 +34,14 @@ SettingsDialog::SettingsDialog::SettingsDialog(const QStringList &availableSenso
         ChartEditorDialog *dialog = new ChartEditorDialog(chartWidget->getChartTitles(), this);
         dialog->exec();
     });
-    connect(editChartsBtn, &QPushButton::clicked, this, [this]() {
-        ChartEditorDialog *dialog = new ChartEditorDialog(chartWidget->getChartTitles(), this);
-        dialog->exec();
+
+    connect(selectSensorsButton, &QPushButton::clicked, this, [this]() {
+        SensorSelectionDialog dialog(this->availableSensors, this);
+        if (dialog.exec() == QDialog::Accepted) {
+            selectedSensors = dialog.getSelectedSensors();
+        }
     });
 
-    chartTypeComboBox = new QComboBox(this);
-    chartTypeComboBox->addItems({"Line", "Scatter"});
-    layout->addRow("Typ wykresu:", chartTypeComboBox);
 
     QPushButton *okButton = new QPushButton("OK", this);
     connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
@@ -64,27 +49,36 @@ SettingsDialog::SettingsDialog::SettingsDialog(const QStringList &availableSenso
 }
 
 int SettingsDialog::getUpdateInterval() const {
-    return updateIntervalSpinBox->value();
+    int val = updateIntervalSpinBox ? updateIntervalSpinBox->value() : 1000;
+    qDebug() << "[SettingsDialog] getUpdateInterval():" << val;
+    return val;
 }
 
-double SettingsDialog::getMinY() const {
-    return minYSpinBox->value();
-}
-
-double SettingsDialog::getMaxY() const {
-    return maxYSpinBox->value();
-}
-
-QString SettingsDialog::getSelectedSensor() const {
-    return sensorComboBox->currentText();
+QStringList SettingsDialog::getSelectedSensors() const {
+    qDebug() << "[SettingsDialog] getSelectedSensors():" << selectedSensors;
+    return selectedSensors;
 }
 
 QString SettingsDialog::getSelectedChartType() const {
-    return chartTypeComboBox->currentText();
+    if (!chartTypeComboBox) {
+        qDebug() << "[SettingsDialog] chartTypeComboBox == nullptr!";
+        return "Line"; // fallback
+    }
+
+    QString val = chartTypeComboBox->currentText();
+    qDebug() << "[SettingsDialog] getSelectedChartType():" << val;
+    return val;
 }
+
 
 QString SettingsDialog::getChartToEdit() const {
-    return editChartComboBox->currentText();
-}
+    if (editChartComboBox->currentText() == " "){
+        qDebug() << "Jest pusto!";
+        return QString();
+    }
+    auto value = editChartComboBox ? editChartComboBox->currentText() : QString();
 
+    qDebug() << "[SettingsDialog] getChartToEdit():" << value;
+    return value;
+}
 

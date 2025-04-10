@@ -13,11 +13,11 @@ class ChartWidget : public QWidget {
 
 public:
     explicit ChartWidget(QWidget *parent = nullptr);
-    void addChart(const QString &title, double minY, double maxY);
+    void addChart(const QString &title, double minY=0, double maxY=100);
     void addData(const QString &chartTitle, double value);
     void clearAllCharts();
     void saveToCSV(const QString &filePath);
-    void setAxisRange(const QString &chartTitle, double minY, double maxY);
+    void setAxisRange(const QString &chartTitle, double minY=0, double maxY=100);
     bool hasChart(const QString &title);
     void changeChartType(const QString &chartTitle, const QString &typeName);
     QStringList getChartTitles() const;

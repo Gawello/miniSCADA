@@ -8,6 +8,7 @@
 #include <QComboBox>
 #include <QFormLayout>
 #include "ChartWidget.h"
+#include "SensorSelectionDialog.h"
 
 class SettingsDialog : public QDialog {
     Q_OBJECT
@@ -18,20 +19,19 @@ public:
                             ChartWidget *chartWidgetRef,
                             QWidget *parent = nullptr);
     int getUpdateInterval() const;
-    double getMinY() const;
-    double getMaxY() const;
-    QString getSelectedSensor() const; // Zwraca wybrany nowy czujnik
+    QStringList getSelectedSensors() const; // Zwraca wybrany nowy czujnik
     QString getSelectedChartType() const;
     QComboBox *editChartComboBox;
     QString getChartToEdit() const;
 
 private:
     QSpinBox *updateIntervalSpinBox;
-    QDoubleSpinBox *minYSpinBox;
-    QDoubleSpinBox *maxYSpinBox;
-    QComboBox *sensorComboBox; // Lista dostępnych czujników
+    // QComboBox *sensorComboBox; // Lista dostępnych czujników
     QComboBox *chartTypeComboBox;
     ChartWidget *chartWidget;
+    QStringList selectedSensors;
+    QStringList availableSensors;
+
 
 };
 

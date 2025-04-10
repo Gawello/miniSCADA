@@ -40,8 +40,6 @@ ChartEditorDialog::ChartEditorDialog(const QStringList &chartNames, QWidget *par
     connect(typeSelector, &QComboBox::currentTextChanged, this, &ChartEditorDialog::updatePreview);
     connect(minYSpin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ChartEditorDialog::updatePreview);
     connect(maxYSpin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ChartEditorDialog::updatePreview);
-    connect(lineStyleSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChartEditorDialog::updatePreview);
-    connect(lineWidthSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, &ChartEditorDialog::updatePreview);
 
     // Layout
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -81,9 +79,16 @@ ChartEditorDialog::ChartEditorDialog(const QStringList &chartNames, QWidget *par
     lineWidthSpin->setRange(1, 10);
     lineWidthSpin->setValue(2);
 
+    formLayout->addWidget(new QLabel("Styl linii:"));
+    formLayout->addWidget(lineStyleSelector);
+    formLayout->addWidget(new QLabel("Grubość linii:"));
+    formLayout->addWidget(lineWidthSpin);
 
     mainLayout->addWidget(applyBtn);
     setLayout(mainLayout);
+
+    connect(lineStyleSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChartEditorDialog::updatePreview);
+    connect(lineWidthSpin, QOverload<int>::of(&QSpinBox::valueChanged), this, &ChartEditorDialog::updatePreview);
 
     previewChart(chartSelector->currentText());
 }
@@ -139,7 +144,6 @@ void ChartEditorDialog::updatePreview() {
     pen.setStyle(style);
     pen.setWidth(width);
     series->setPen(pen);
-
 
     previewView->setChart(chart);
 }

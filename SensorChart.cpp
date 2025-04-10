@@ -15,11 +15,6 @@ SensorChart::SensorChart(const QString &title, double minY, double maxY, QWidget
     axisX->setRange(0, 100);
     axisX->setLabelFormat("%d");
     axisX->setTitleText("Pomiar");
-    connect(axisX, &QValueAxis::rangeChanged, this, [this](qreal min, qreal max) {
-        Q_UNUSED(min);
-        Q_UNUSED(max);
-        userXRangeActive = true;
-    });
 
     axisY = new QValueAxis();
     axisY->setRange(minY, maxY);
@@ -32,6 +27,32 @@ SensorChart::SensorChart(const QString &title, double minY, double maxY, QWidget
 
     chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(chartView);
+    setLayout(layout);
+
+    chartView->setRubberBand(QChartView::HorizontalRubberBand); // przeciąganie
+    chartView->setDragMode(QGraphicsView::ScrollHandDrag);       // scroll myszką
+    chartView->setInteractive(true);                             // aktywacja interakcji
+
+    connect(axisX, &QValueAxis::rangeChanged, this, [this](qreal min, qreal max) {
+        if (!userXRangeActive) {
+            qDebug() << "[SensorChart] Użytkownik przesunął wykres. Auto-scroll off.";
+        }
+        userXRangeActive = true;
+        autoScrollResetTimer->start(3000); // 3 sekundy
+    });
+    autoScrollResetTimer = new QTimer(this);
+    autoScrollResetTimer->setSingleShot(true); // tylko raz
+
+    connect(autoScrollResetTimer, &QTimer::timeout, this, [this]() {
+        userXRangeActive = false;
+        qDebug() << "[SensorChart] Auto-scroll przywrócony automatycznie po 3 sekundach.";
+    });
+
+
 }
 
 void SensorChart::resetAutoScroll() {
@@ -52,20 +73,22 @@ void SensorChart::addDataPoint(double value) {
     const int maxPoints = 1000;
     if (xySeries->count() > maxPoints) {
         QList<QPointF> points = xySeries->points();
-        points.removeFirst(); // usuwamy najstarszy punkt
+        points.removeFirst(); // usuwa najstarszy punkt
         xySeries->replace(points);
     }
 
-    // Jeśli użytkownik nie przesunął widoku, auto-przewijaj
+    // Auto-przewijanie tylko jeśli użytkownik nie przesunął wykresu
     if (!userXRangeActive) {
+        int visiblePoints = 100;
         axisX->setMax(dataCount);
-        axisX->setMin(qMax(0, dataCount - 100));
+        axisX->setMin(qMax(0, dataCount - visiblePoints));
     }
 
-    // Skalowanie Y w czasie rzeczywistym
+    // Dynamiczne skalowanie osi Y
     if (value > axisY->max()) axisY->setMax(value + 5);
     if (value < axisY->min()) axisY->setMin(value - 5);
 }
+
 
 
 void SensorChart::clearChart() {
@@ -141,4 +164,8 @@ void SensorChart::setSeriesStyle(Qt::PenStyle style, int width) {
         pen.setWidth(width);
         xy->setPen(pen);
     }
+}
+
+void SensorChart::enableAutoScroll() {
+    userXRangeActive = false;
 }

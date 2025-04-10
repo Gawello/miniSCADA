@@ -28,23 +28,6 @@ ClientWindow::ClientWindow(QWidget *parent) : QMainWindow(parent) {
 
     settingsButton = new QPushButton("Ustawienia", this);
     connect(settingsButton, &QPushButton::clicked, this, &ClientWindow::openSettings);
-    ChartEditorDialog *editor = new ChartEditorDialog(chartWidget->getChartTitles(), this);
-
-    connect(editor, &ChartEditorDialog::chartUpdated, this,
-            [=](const QString &title,
-                const QString &type,
-                const QColor &color,
-                Qt::PenStyle style,
-                int width,
-                double minY,
-                double maxY) {
-                chartWidget->changeChartType(title, type);
-                chartWidget->setChartColor(title, color);
-                chartWidget->setChartStyle(title, style, width);
-                chartWidget->setAxisRange(title, minY, maxY);
-            });
-
-    editor->exec();
 
     layout->addWidget(chartWidget);
     layout->addWidget(saveButton);
@@ -82,34 +65,47 @@ void ClientWindow::saveCSV() {
 }
 
 void ClientWindow::openSettings() {
-    QStringList unusedSensors = getUnusedSensors();
-    QStringList existingCharts = chartWidget->getChartTitles(); // nowa metoda
+    qDebug() << "[ClientWindow] Otwieranie okna ustawień";
 
-    SettingsDialog dialog(unusedSensors, chartWidget->getChartTitles(), chartWidget, this);
+    QStringList unusedSensors = getUnusedSensors();
+    QStringList existingCharts = chartWidget->getChartTitles();
+
+    SettingsDialog dialog(unusedSensors, existingCharts, chartWidget, this);
 
     if (dialog.exec() == QDialog::Accepted) {
-        QString chartToEdit = dialog.getChartToEdit();        // istniejący wykres
-        QString newSensor = dialog.getSelectedSensor();       // nowy czujnik
-        QString chartType = dialog.getSelectedChartType();
-        double minY = dialog.getMinY();
-        double maxY = dialog.getMaxY();
+        qDebug() << "[ClientWindow] OK kliknięte w ustawieniach";
+
+        QStringList newSensors = dialog.getSelectedSensors();
+        QString chartToEdit = dialog.getChartToEdit();
         int interval = dialog.getUpdateInterval();
 
-        if (!newSensor.isEmpty() && !chartWidget->hasChart(newSensor)) {
-            chartWidget->addChart(newSensor, minY, maxY);
-            chartWidget->changeChartType(newSensor, chartType);
+        qDebug() << "[ClientWindow] Nowe sensory:" << newSensors;
+        qDebug() << "[ClientWindow] Edytowany wykres:" << chartToEdit;
+
+        // Dodaj nowe czujniki jako wykresy
+        for (const QString &sensor : newSensors) {
+            if (!sensor.isEmpty() && !chartWidget->hasChart(sensor)) {
+                qDebug() << "[ClientWindow] Dodaję nowy wykres:" << sensor;
+                chartWidget->addChart(sensor);
+                // Typ i styl wykresu ustawi użytkownik w ChartEditorDialog
+            }
         }
 
-        if (!chartToEdit.isEmpty()) {
-            chartWidget->setAxisRange(chartToEdit, minY, maxY);
-            chartWidget->changeChartType(chartToEdit, chartType);
+        // Ustaw zakres Y (jeśli wybrano istniejący wykres)
+        if (!chartToEdit.isEmpty() && chartToEdit != " " && chartWidget->hasChart(chartToEdit)) {
+            qDebug() << "[ClientWindow] Ustawiam zakres Y dla wykresu:" << chartToEdit;
+            chartWidget->setAxisRange(chartToEdit);
         }
 
+        // Ustaw nowy interwał odświeżania
         tcpClient->setUpdateInterval(interval);
+        qDebug() << "[ClientWindow] Interwał odświeżania ustawiony na:" << interval;
+    } else {
+        qDebug() << "[ClientWindow] Anulowano okno ustawień";
     }
-
-    auto editor = new ChartEditorDialog(chartWidget->getChartTitles(), this);
 }
+
+
 
 QStringList ClientWindow::getUnusedSensors() const {
     QStringList unused;

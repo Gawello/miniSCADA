@@ -30,6 +30,7 @@ void TcpClient::readData() {
     while (socket->canReadLine()) {
         QByteArray data = socket->readLine().trimmed();
         emit newDataReceived(QString::fromUtf8(data));
+        qDebug() << data;
     }
 }
 

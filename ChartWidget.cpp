@@ -11,9 +11,19 @@ void ChartWidget::addChart(const QString &title, double minY, double maxY) {
     if (!charts.contains(title)) {
         SensorChart *chart = new SensorChart(title, minY, maxY, this);
         charts[title] = chart;
-        layout->addWidget(chart->getChartView());
+
+        QChartView *view = chart->getChartView();
+        if (view) {
+            layout->addWidget(view);
+            qDebug() << "[ChartWidget] Dodano nowy wykres:" << title;
+        } else {
+            qDebug() << "[ChartWidget] Uwaga: getChartView() zwrócił nullptr dla:" << title;
+        }
+    } else {
+        qDebug() << "[ChartWidget] Wykres już istnieje:" << title;
     }
 }
+
 
 void ChartWidget::addData(const QString &chartTitle, double value) {
     if (charts.contains(chartTitle)) {
@@ -70,11 +80,16 @@ void ChartWidget::saveToCSV(const QString &filePath) {
 
 void ChartWidget::setAxisRange(const QString &chartTitle, double minY, double maxY) {
     if (!charts.contains(chartTitle)) {
-        qDebug() << "Brak wykresu o nazwie:" << chartTitle;
+        qDebug() << "[ChartWidget] Brak wykresu o nazwie:" << chartTitle;
         return;
     }
-    if (charts.contains(chartTitle)) {
-        charts[chartTitle]->getAxisY()->setRange(minY, maxY);
+
+    QValueAxis *axis = charts[chartTitle]->getAxisY();
+    if (axis) {
+        axis->setRange(minY, maxY);
+        qDebug() << "[ChartWidget] Zakres Y ustawiony dla:" << chartTitle << "min:" << minY << "max:" << maxY;
+    } else {
+        qDebug() << "[ChartWidget] Brak osi Y w wykresie:" << chartTitle;
     }
 }
 
@@ -84,21 +99,41 @@ bool ChartWidget::hasChart(const QString &title) {
 
 
 void ChartWidget::changeChartType(const QString &chartTitle, const QString &typeName) {
-    if (!charts.contains(chartTitle)) return;
+    if (!charts.contains(chartTitle)) {
+        qDebug() << "[ChartWidget] Nie znaleziono wykresu:" << chartTitle;
+        return;
+    }
 
     SensorChart::ChartType type;
 
-    if (typeName == "Line")
+    if (typeName == "Line") {
         type = SensorChart::ChartType::Line;
-    else if (typeName == "Scatter")
+    } else if (typeName == "Scatter") {
         type = SensorChart::ChartType::Scatter;
-    else
+    } else {
+        qDebug() << "[ChartWidget] Nieznany typ wykresu:" << typeName;
         return;
+    }
 
     charts[chartTitle]->changeType(type);
+    qDebug() << "[ChartWidget] Typ wykresu zmieniony na:" << typeName << "dla" << chartTitle;
 }
+
 
 QStringList ChartWidget::getChartTitles() const {
     return charts.keys();
 }
+
+void ChartWidget::setChartColor(const QString &chartTitle, const QColor &color) {
+    if (!charts.contains(chartTitle)) return;
+
+    charts[chartTitle]->setSeriesColor(color);
+}
+
+void ChartWidget::setChartStyle(const QString &chartTitle, Qt::PenStyle style, int width) {
+    if (!charts.contains(chartTitle)) return;
+
+    charts[chartTitle]->setSeriesStyle(style, width);
+}
+
 

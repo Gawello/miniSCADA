@@ -3,8 +3,11 @@ import json
 import time
 import requests
 
+
 # === KONFIGURACJA ===
-API_KEY = ""  # Zamień na własny klucz API z OpenWeatherMap
+f = open("klucz.txt", "r")
+API_KEY = f.read()  # Zamień na własny klucz API z OpenWeatherMap
+f.close()
 CITY = "Warsaw"  # Miasto, dla którego pobieramy pogodę
 SERVER_IP = "192.168.0.3"  # Adres IP Twojego komputera
 SERVER_PORT = 12345  # Port na którym działa serwer

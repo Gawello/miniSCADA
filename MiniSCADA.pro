@@ -10,19 +10,32 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ChartEditorDialog.cpp \
     ChartWidget.cpp \
     ClientWindow.cpp \
+    DataField.cpp \
+    InfoPanel.cpp \
+    NumericField.cpp \
     SensorChart.cpp \
+    SensorSelectionDialog.cpp \
     SettingsDialog.cpp \
     TcpClient.cpp \
+    TextField.cpp \
     main.cpp
 
 HEADERS += \
+    ChartEditorDialog.h \
     ChartWidget.h \
     ClientWindow.h \
+    DataField.h \
+    InfoPanel.h \
+    NumericField.h \
     SensorChart.h \
+    SensorSelectionDialog.h \
     SettingsDialog.h \
-    TcpClient.h
+    TcpClient.h \
+    TextField.h \
+    ValueProcessor.h
 
 TRANSLATIONS += \
     MiniSCADA_en_US.ts

@@ -1,8 +1,10 @@
 #include "ClientWindow.h"
+#include "ChartEditorDialog.h"
 #include <QVBoxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFileDialog>
+#include "ValueProcessor.h"
 
 ClientWindow::ClientWindow(QWidget *parent) : QMainWindow(parent) {
     setWindowTitle("Mini SCADA - Klient");
@@ -45,6 +47,10 @@ void ClientWindow::updateData(const QString &data) {
 
     QJsonObject obj = doc.object();
 
+    // ValueProcessor<double> processor;
+    // processor.addValue(value);
+    // qDebug() << "Średnia z danych:" << processor.average();
+
     for (const QString &key : obj.keys()) {
         double value = obj[key].toDouble();
 
@@ -64,32 +70,38 @@ void ClientWindow::saveCSV() {
 }
 
 void ClientWindow::openSettings() {
-    QStringList unusedSensors = getUnusedSensors();
-    QStringList existingCharts = chartWidget->getChartTitles(); // nowa metoda
+    qDebug() << "[ClientWindow] Otwieranie okna ustawień";
 
-    SettingsDialog dialog(unusedSensors, existingCharts, this);
+    QStringList unusedSensors = getUnusedSensors();
+    QStringList existingCharts = chartWidget->getChartTitles();
+
+    SettingsDialog dialog(unusedSensors, existingCharts, chartWidget, this);
 
     if (dialog.exec() == QDialog::Accepted) {
-        QString chartToEdit = dialog.getChartToEdit();        // istniejący wykres
-        QString newSensor = dialog.getSelectedSensor();       // nowy czujnik
-        QString chartType = dialog.getSelectedChartType();
-        double minY = dialog.getMinY();
-        double maxY = dialog.getMaxY();
+        qDebug() << "[ClientWindow] OK kliknięte w ustawieniach";
+
+        QStringList newSensors = dialog.getSelectedSensors();
         int interval = dialog.getUpdateInterval();
 
-        if (!newSensor.isEmpty() && !chartWidget->hasChart(newSensor)) {
-            chartWidget->addChart(newSensor, minY, maxY);
-            chartWidget->changeChartType(newSensor, chartType);
+        qDebug() << "[ClientWindow] Nowe sensory:" << newSensors;
+
+        // Dodaj nowe czujniki jako wykresy z domyślnym zakresem i typem
+        for (const QString &sensor : newSensors) {
+            if (!sensor.isEmpty() && !chartWidget->hasChart(sensor)) {
+                qDebug() << "[ClientWindow] Dodaję nowy wykres:" << sensor;
+                chartWidget->addChart(sensor, 0, 100);  // domyślny zakres Y
+                // Typ wykresu i styl zostaną ustawione później przez użytkownika w ChartEditorDialog
+            }
         }
 
-        if (!chartToEdit.isEmpty()) {
-            chartWidget->setAxisRange(chartToEdit, minY, maxY);
-            chartWidget->changeChartType(chartToEdit, chartType);
-        }
-
+        // Ustaw nowy interwał odświeżania
         tcpClient->setUpdateInterval(interval);
+        qDebug() << "[ClientWindow] Interwał odświeżania ustawiony na:" << interval;
+    } else {
+        qDebug() << "[ClientWindow] Anulowano okno ustawień";
     }
 }
+
 
 QStringList ClientWindow::getUnusedSensors() const {
     QStringList unused;
@@ -99,4 +111,22 @@ QStringList ClientWindow::getUnusedSensors() const {
         }
     }
     return unused;
+}
+
+void ClientWindow::openChartEditor() {
+    ChartEditorDialog *editor = new ChartEditorDialog(chartWidget->getChartTitles(), this);
+    connect(editor, &ChartEditorDialog::chartUpdated, this,
+            [=](const QString &title,
+                const QString &type,
+                const QColor &color,
+                Qt::PenStyle style,
+                int width,
+                double minY,
+                double maxY) {
+                chartWidget->changeChartType(title, type);
+                chartWidget->setChartColor(title, color);
+                chartWidget->setChartStyle(title, style, width);
+                chartWidget->setAxisRange(title, minY, maxY);
+            });
+    editor->exec();
 }

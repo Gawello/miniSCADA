@@ -1,8 +1,11 @@
 #include "SensorChart.h"
 #include <QVBoxLayout>
+#include <QTimer>
+#include <QEvent>
+#include <QWheelEvent>
 
 SensorChart::SensorChart(const QString &title, double minY, double maxY, QWidget *parent)
-    : QWidget(parent), dataCount(0) {
+    : QWidget(parent), dataCount(0), userInteracting(false) {
 
     series = new QLineSeries();
 
@@ -27,27 +30,39 @@ SensorChart::SensorChart(const QString &title, double minY, double maxY, QWidget
 
     chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->addWidget(chartView);
+    setLayout(layout);
+
+    autoScrollTimer = new QTimer(this);
+    autoScrollTimer->setInterval(3000);
+    autoScrollTimer->setSingleShot(true);
+    connect(autoScrollTimer, &QTimer::timeout, this, [=]() {
+        userInteracting = false;
+    });
+
+    chartView->viewport()->installEventFilter(this);
 }
 
 void SensorChart::addDataPoint(double value) {
     auto xySeries = qobject_cast<QXYSeries*>(series);
-    if (!xySeries) return; // bezpieczeństwo
+    if (!xySeries) return;
 
-    if (dataCount > 1000) {
-        // Usuwamy najstarszy punkt
-        QList<QPointF> points = xySeries->points();
-        if (!points.isEmpty()) {
-            points.removeFirst();
-        }
-        xySeries->replace(points); // zamieniamy całą serię nową listą
-    } else {
-        dataCount++;
-    }
-
+    dataCount++;
     xySeries->append(dataCount, value);
 
-    axisX->setMax(dataCount);
-    axisX->setMin(qMax(0, dataCount - 100));
+    const int maxPoints = 1000;
+    if (xySeries->count() > maxPoints) {
+        QList<QPointF> points = xySeries->points();
+        points.removeFirst();
+        xySeries->replace(points);
+    }
+
+    if (!userInteracting) {
+        axisX->setMax(dataCount);
+        axisX->setMin(qMax(0, dataCount - 100));
+    }
 
     if (value > axisY->max()) axisY->setMax(value + 5);
     if (value < axisY->min()) axisY->setMin(value - 5);
@@ -65,18 +80,15 @@ QChartView* SensorChart::getChartView() const {
     return chartView;
 }
 
-
 QAbstractSeries* SensorChart::getSeries() const {
     return series;
 }
-
 
 QValueAxis* SensorChart::getAxisY() const {
     return axisY;
 }
 
 void SensorChart::changeType(ChartType newType) {
-    // 1. Skopiuj dane z obecnej serii
     QList<QPointF> oldPoints;
     if (auto line = qobject_cast<QLineSeries*>(series)) {
         oldPoints = line->points();
@@ -84,11 +96,9 @@ void SensorChart::changeType(ChartType newType) {
         oldPoints = scatter->points();
     }
 
-    // 2. Usuń starą serię z wykresu
     chart->removeSeries(series);
     delete series;
 
-    // 3. Utwórz nową serię wybranego typu
     switch (newType) {
     case ChartType::Line:
         series = new QLineSeries();
@@ -98,13 +108,51 @@ void SensorChart::changeType(ChartType newType) {
         break;
     }
 
-    // 4. Dodaj punkty do nowej serii
     for (const QPointF &point : oldPoints) {
         static_cast<QXYSeries*>(series)->append(point);
     }
 
-    // 5. Podłącz serię do wykresu i osi
     chart->addSeries(series);
     series->attachAxis(axisX);
     series->attachAxis(axisY);
+}
+
+void SensorChart::setSeriesColor(const QColor &color) {
+    auto xy = qobject_cast<QXYSeries*>(series);
+    if (xy) {
+        QPen pen = xy->pen();
+        pen.setColor(color);
+        xy->setPen(pen);
+    }
+}
+
+void SensorChart::setSeriesStyle(Qt::PenStyle style, int width) {
+    auto xy = qobject_cast<QXYSeries*>(series);
+    if (xy) {
+        QPen pen = xy->pen();
+        pen.setStyle(style);
+        pen.setWidth(width);
+        xy->setPen(pen);
+    }
+}
+
+bool SensorChart::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == chartView->viewport()) {
+        if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::Wheel) {
+            userInteracting = true;
+            autoScrollTimer->start();
+        }
+    }
+    return QWidget::eventFilter(obj, event);
+}
+
+void SensorChart::setAxisRange(double minY, double maxY) {
+    axisY->setRange(minY, maxY);
+}
+
+void SensorChart::applyEditorSettings(const QColor &color, Qt::PenStyle style, int width, double minY, double maxY, ChartType type) {
+    setSeriesColor(color);
+    setSeriesStyle(style, width);
+    setAxisRange(minY, maxY);
+    changeType(type);
 }

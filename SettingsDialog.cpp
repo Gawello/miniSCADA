@@ -1,9 +1,12 @@
 #include "SettingsDialog.h"
+#include "ChartEditorDialog.h"
 
 SettingsDialog::SettingsDialog(const QStringList &availableSensors,
                                const QStringList &existingCharts,
+                               ChartWidget *chartWidgetRef,
                                QWidget *parent)
-    : QDialog(parent) {
+    : QDialog(parent), availableSensors(availableSensors), chartWidget(chartWidgetRef) {
+
     setWindowTitle("Ustawienia");
 
     QFormLayout *layout = new QFormLayout(this);
@@ -11,58 +14,43 @@ SettingsDialog::SettingsDialog(const QStringList &availableSensors,
     updateIntervalSpinBox = new QSpinBox(this);
     updateIntervalSpinBox->setRange(100, 5000);
     updateIntervalSpinBox->setValue(1000);
-
-    minYSpinBox = new QDoubleSpinBox(this);
-    minYSpinBox->setRange(-1000, 1000);
-    minYSpinBox->setValue(0);
-
-    maxYSpinBox = new QDoubleSpinBox(this);
-    maxYSpinBox->setRange(-1000, 1000);
-    maxYSpinBox->setValue(100);
-
-    sensorComboBox = new QComboBox(this);
-    sensorComboBox->addItems(availableSensors);
-
     layout->addRow("Interwał odświeżania (ms):", updateIntervalSpinBox);
-    layout->addRow("Minimalna wartość Y:", minYSpinBox);
-    layout->addRow("Maksymalna wartość Y:", maxYSpinBox);
-    layout->addRow("Nowy czujnik do dodania:", sensorComboBox);
 
-    editChartComboBox = new QComboBox(this);
-    editChartComboBox->addItems(existingCharts);
-    layout->addRow("Edytuj wykres:", editChartComboBox);
+    // Wybór czujników do dodania
+    QPushButton *selectSensorsButton = new QPushButton("Wybierz czujniki do dodania", this);
+    layout->addRow("Nowe czujniki:", selectSensorsButton);
 
-    chartTypeComboBox = new QComboBox(this);
-    chartTypeComboBox->addItems({"Line", "Scatter"});
-    layout->addRow("Typ wykresu:", chartTypeComboBox);
+    connect(selectSensorsButton, &QPushButton::clicked, this, [this]() {
+        SensorSelectionDialog dialog(this->availableSensors, this);
+        if (dialog.exec() == QDialog::Accepted) {
+            selectedSensors = dialog.getSelectedSensors();
+        }
+    });
 
+    // Przyciski do edycji
+    QPushButton *editChartsBtn = new QPushButton("Edytuj wykresy", this);
+    QPushButton *editPanelsBtn = new QPushButton("Edytuj pola danych", this);
+    QPushButton *editControlsBtn = new QPushButton("Edytuj kontrolki", this);
+
+    layout->addWidget(editChartsBtn);
+    layout->addWidget(editPanelsBtn);
+    layout->addWidget(editControlsBtn);
+
+    connect(editChartsBtn, &QPushButton::clicked, this, [this]() {
+        ChartEditorDialog *dialog = new ChartEditorDialog(chartWidget->getChartTitles(), this);
+        dialog->exec();
+    });
+
+    // Przycisk OK
     QPushButton *okButton = new QPushButton("OK", this);
     connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
     layout->addWidget(okButton);
 }
 
 int SettingsDialog::getUpdateInterval() const {
-    return updateIntervalSpinBox->value();
+    return updateIntervalSpinBox ? updateIntervalSpinBox->value() : 1000;
 }
 
-double SettingsDialog::getMinY() const {
-    return minYSpinBox->value();
+QStringList SettingsDialog::getSelectedSensors() const {
+    return selectedSensors;
 }
-
-double SettingsDialog::getMaxY() const {
-    return maxYSpinBox->value();
-}
-
-QString SettingsDialog::getSelectedSensor() const {
-    return sensorComboBox->currentText();
-}
-
-QString SettingsDialog::getSelectedChartType() const {
-    return chartTypeComboBox->currentText();
-}
-
-QString SettingsDialog::getChartToEdit() const {
-    return editChartComboBox->currentText();
-}
-
-

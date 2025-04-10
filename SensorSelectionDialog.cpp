@@ -13,11 +13,10 @@ SensorSelectionDialog::SensorSelectionDialog(const QStringList &availableSensors
         layout->addWidget(box);
     }
 
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    layout->addWidget(buttonBox);
-
+    auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SensorSelectionDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &SensorSelectionDialog::reject);
+    layout->addWidget(buttonBox);
 }
 
 QStringList SensorSelectionDialog::getSelectedSensors() const {

@@ -2,29 +2,18 @@
 #define CHARTEDITORDIALOG_H
 
 #include <QDialog>
-#include <QComboBox>
-#include <QPushButton>
-#include <QDoubleSpinBox>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QColor>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QScatterSeries>
-#include <QtCharts/QValueAxis>
-
-QT_BEGIN_NAMESPACE
-namespace QtCharts {
-class QChart;
-}
-QT_END_NAMESPACE
+#include <QStringList>
 
 class ChartEditorDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ChartEditorDialog(const QStringList &chartNames,
-                               QWidget *parent = nullptr);
+    explicit ChartEditorDialog(const QStringList &chartNames, QWidget *parent = nullptr);
 
 signals:
     void chartUpdated(const QString &chartName,
@@ -35,25 +24,23 @@ signals:
                       double minY,
                       double maxY);
 
-private slots:
-    void chooseColor();
-    void applyChanges();
-    void previewChart(const QString &chartName);
-
 private:
+    void updatePreview();
+    void chooseColor();
+    void previewChart(const QString &chartName);
+    void applyChanges();
+
     QComboBox *chartSelector;
     QComboBox *typeSelector;
-    QPushButton *colorButton;
+    QComboBox *lineStyleSelector;
+    QSpinBox *lineWidthSpin;
     QDoubleSpinBox *minYSpin;
     QDoubleSpinBox *maxYSpin;
+    QPushButton *colorButton;
     QChartView *previewView;
 
     QColor selectedColor = Qt::blue;
     QString currentChart;
-    QComboBox *lineStyleSelector;
-    QSpinBox *lineWidthSpin;
-
-    void updatePreview();
 };
 
 #endif // CHARTEDITORDIALOG_H

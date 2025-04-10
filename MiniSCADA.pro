@@ -34,7 +34,8 @@ HEADERS += \
     SensorSelectionDialog.h \
     SettingsDialog.h \
     TcpClient.h \
-    TextField.h
+    TextField.h \
+    ValueProcessor.h
 
 TRANSLATIONS += \
     MiniSCADA_en_US.ts

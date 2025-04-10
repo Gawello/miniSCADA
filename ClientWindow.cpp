@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFileDialog>
+#include "ValueProcessor.h"
 
 ClientWindow::ClientWindow(QWidget *parent) : QMainWindow(parent) {
     setWindowTitle("Mini SCADA - Klient");
@@ -45,6 +46,10 @@ void ClientWindow::updateData(const QString &data) {
     if (!doc.isObject()) return;
 
     QJsonObject obj = doc.object();
+
+    // ValueProcessor<double> processor;
+    // processor.addValue(value);
+    // qDebug() << "Średnia z danych:" << processor.average();
 
     for (const QString &key : obj.keys()) {
         double value = obj[key].toDouble();

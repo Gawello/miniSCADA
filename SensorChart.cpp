@@ -1,8 +1,11 @@
 #include "SensorChart.h"
 #include <QVBoxLayout>
+#include <QTimer>
+#include <QEvent>
+#include <QWheelEvent>
 
 SensorChart::SensorChart(const QString &title, double minY, double maxY, QWidget *parent)
-    : QWidget(parent), dataCount(0) {
+    : QWidget(parent), dataCount(0), userInteracting(false) {
 
     series = new QLineSeries();
 
@@ -29,67 +32,41 @@ SensorChart::SensorChart(const QString &title, double minY, double maxY, QWidget
     chartView->setRenderHint(QPainter::Antialiasing);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(chartView);
     setLayout(layout);
 
-    chartView->setRubberBand(QChartView::HorizontalRubberBand); // przeciąganie
-    chartView->setDragMode(QGraphicsView::ScrollHandDrag);       // scroll myszką
-    chartView->setInteractive(true);                             // aktywacja interakcji
-
-    connect(axisX, &QValueAxis::rangeChanged, this, [this](qreal min, qreal max) {
-        if (!userXRangeActive) {
-            qDebug() << "[SensorChart] Użytkownik przesunął wykres. Auto-scroll off.";
-        }
-        userXRangeActive = true;
-        autoScrollResetTimer->start(3000); // 3 sekundy
-    });
-    autoScrollResetTimer = new QTimer(this);
-    autoScrollResetTimer->setSingleShot(true); // tylko raz
-
-    connect(autoScrollResetTimer, &QTimer::timeout, this, [this]() {
-        userXRangeActive = false;
-        qDebug() << "[SensorChart] Auto-scroll przywrócony automatycznie po 3 sekundach.";
+    autoScrollTimer = new QTimer(this);
+    autoScrollTimer->setInterval(3000);
+    autoScrollTimer->setSingleShot(true);
+    connect(autoScrollTimer, &QTimer::timeout, this, [=]() {
+        userInteracting = false;
     });
 
-
+    chartView->viewport()->installEventFilter(this);
 }
-
-void SensorChart::resetAutoScroll() {
-    userXRangeActive = false;
-}
-
 
 void SensorChart::addDataPoint(double value) {
     auto xySeries = qobject_cast<QXYSeries*>(series);
     if (!xySeries) return;
 
     dataCount++;
-
-    // Dodaj nowy punkt
     xySeries->append(dataCount, value);
 
-    // Usuń nadmiar danych
     const int maxPoints = 1000;
     if (xySeries->count() > maxPoints) {
         QList<QPointF> points = xySeries->points();
-        points.removeFirst(); // usuwa najstarszy punkt
+        points.removeFirst();
         xySeries->replace(points);
     }
 
-    // Auto-przewijanie tylko jeśli użytkownik nie przesunął wykresu
-    if (!userXRangeActive) {
-        int visiblePoints = 100;
+    if (!userInteracting) {
         axisX->setMax(dataCount);
-        axisX->setMin(qMax(0, dataCount - visiblePoints));
+        axisX->setMin(qMax(0, dataCount - 100));
     }
 
-    // Dynamiczne skalowanie osi Y
     if (value > axisY->max()) axisY->setMax(value + 5);
     if (value < axisY->min()) axisY->setMin(value - 5);
 }
-
-
 
 void SensorChart::clearChart() {
     auto xySeries = qobject_cast<QXYSeries*>(series);
@@ -103,18 +80,15 @@ QChartView* SensorChart::getChartView() const {
     return chartView;
 }
 
-
 QAbstractSeries* SensorChart::getSeries() const {
     return series;
 }
-
 
 QValueAxis* SensorChart::getAxisY() const {
     return axisY;
 }
 
 void SensorChart::changeType(ChartType newType) {
-    // 1. Skopiuj dane z obecnej serii
     QList<QPointF> oldPoints;
     if (auto line = qobject_cast<QLineSeries*>(series)) {
         oldPoints = line->points();
@@ -122,11 +96,9 @@ void SensorChart::changeType(ChartType newType) {
         oldPoints = scatter->points();
     }
 
-    // 2. Usuń starą serię z wykresu
     chart->removeSeries(series);
     delete series;
 
-    // 3. Utwórz nową serię wybranego typu
     switch (newType) {
     case ChartType::Line:
         series = new QLineSeries();
@@ -136,12 +108,10 @@ void SensorChart::changeType(ChartType newType) {
         break;
     }
 
-    // 4. Dodaj punkty do nowej serii
     for (const QPointF &point : oldPoints) {
         static_cast<QXYSeries*>(series)->append(point);
     }
 
-    // 5. Podłącz serię do wykresu i osi
     chart->addSeries(series);
     series->attachAxis(axisX);
     series->attachAxis(axisY);
@@ -166,6 +136,23 @@ void SensorChart::setSeriesStyle(Qt::PenStyle style, int width) {
     }
 }
 
-void SensorChart::enableAutoScroll() {
-    userXRangeActive = false;
+bool SensorChart::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == chartView->viewport()) {
+        if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::Wheel) {
+            userInteracting = true;
+            autoScrollTimer->start();
+        }
+    }
+    return QWidget::eventFilter(obj, event);
+}
+
+void SensorChart::setAxisRange(double minY, double maxY) {
+    axisY->setRange(minY, maxY);
+}
+
+void SensorChart::applyEditorSettings(const QColor &color, Qt::PenStyle style, int width, double minY, double maxY, ChartType type) {
+    setSeriesColor(color);
+    setSeriesStyle(style, width);
+    setAxisRange(minY, maxY);
+    changeType(type);
 }

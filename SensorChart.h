@@ -27,8 +27,11 @@ public:
     void setSeriesColor(const QColor &color);
     void setSeriesStyle(Qt::PenStyle style, int width);
     void enableAutoScroll();
-    QTimer *autoScrollResetTimer;
-
+    bool userInteracting = false;
+    QTimer *autoScrollTimer = nullptr;
+    bool eventFilter(QObject *obj, QEvent *event);
+    void setAxisRange(double minY, double maxY);
+    void applyEditorSettings(const QColor &color, Qt::PenStyle style, int width, double minY, double maxY, ChartType type);
 
 private:
     QChart *chart;

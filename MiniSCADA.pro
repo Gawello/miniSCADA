@@ -13,22 +13,28 @@ SOURCES += \
     ChartEditorDialog.cpp \
     ChartWidget.cpp \
     ClientWindow.cpp \
+    DataField.cpp \
     InfoPanel.cpp \
+    NumericField.cpp \
     SensorChart.cpp \
     SensorSelectionDialog.cpp \
     SettingsDialog.cpp \
     TcpClient.cpp \
+    TextField.cpp \
     main.cpp
 
 HEADERS += \
     ChartEditorDialog.h \
     ChartWidget.h \
     ClientWindow.h \
+    DataField.h \
     InfoPanel.h \
+    NumericField.h \
     SensorChart.h \
     SensorSelectionDialog.h \
     SettingsDialog.h \
-    TcpClient.h
+    TcpClient.h \
+    TextField.h
 
 TRANSLATIONS += \
     MiniSCADA_en_US.ts

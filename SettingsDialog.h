@@ -21,6 +21,15 @@ public:
     int getUpdateInterval() const;
     QStringList getSelectedSensors() const;
 
+signals:
+    void chartUpdated(const QString &chartName,
+                      const QString &chartType,
+                      const QColor &lineColor,
+                      Qt::PenStyle style,
+                      int width,
+                      double minY,
+                      double maxY);
+
 private:
     QSpinBox *updateIntervalSpinBox = nullptr;
     QStringList availableSensors;

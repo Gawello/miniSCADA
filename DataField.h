@@ -4,6 +4,10 @@
 #include <QWidget>
 #include <QVariant>
 
+/**
+ * @class DataField
+ * @brief Klasa odpowiedzialna za datafield.
+ */
 class DataField {
 public:
     virtual ~DataField() = default;

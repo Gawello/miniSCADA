@@ -9,10 +9,17 @@
 #include <QtCharts/QChartView>
 #include <QStringList>
 
+/**
+ * @class ChartEditorDialog
+ * @brief Klasa odpowiedzialna za charteditordialog.
+ */
 class ChartEditorDialog : public QDialog {
     Q_OBJECT
 
 public:
+    /**
+ * @brief Metoda ChartEditorDialog.
+ */
     explicit ChartEditorDialog(const QStringList &chartNames, QWidget *parent = nullptr);
 
 signals:
@@ -25,9 +32,21 @@ signals:
                       double maxY);
 
 private:
+    /**
+ * @brief Metoda updatePreview.
+ */
     void updatePreview();
+    /**
+ * @brief Metoda chooseColor.
+ */
     void chooseColor();
+    /**
+ * @brief Metoda previewChart.
+ */
     void previewChart(const QString &chartName);
+    /**
+ * @brief Metoda applyChanges.
+ */
     void applyChanges();
 
     QComboBox *chartSelector;

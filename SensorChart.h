@@ -12,87 +12,71 @@
 
 /**
  * @class SensorChart
- * @brief Klasa odpowiedzialna za jeden wykres czujnika w systemie Mini SCADA.
- *
- * Umożliwia dodawanie danych, automatyczne przewijanie osi X, dynamiczne skalowanie osi Y
- * oraz zmianę typu wykresu (liniowy, punktowy).
+ * @brief Klasa odpowiedzialna za sensorchart.
  */
 class SensorChart : public QWidget {
     Q_OBJECT
 
 public:
     /**
-     * @brief Konstruktor wykresu czujnika.
-     * @param title Tytuł wykresu.
-     * @param minY Minimalna wartość osi Y.
-     * @param maxY Maksymalna wartość osi Y.
-     * @param parent Wskaźnik na obiekt rodzica.
-     */
+ * @brief Metoda SensorChart.
+ */
     explicit SensorChart(const QString &title, double minY, double maxY, QWidget *parent = nullptr);
-
     /**
-     * @brief Dodaje punkt danych do wykresu.
-     * @param value Wartość pomiaru.
-     */
+ * @brief Metoda addDataPoint.
+ */
     void addDataPoint(double value);
-
     /**
-     * @brief Czyści dane z wykresu.
-     */
+ * @brief Metoda clearChart.
+ */
     void clearChart();
-
     /**
-     * @brief Zwraca wskaźnik do widoku wykresu.
-     * @return QChartView* wskaźnik do widoku.
-     */
+ * @brief Metoda getChartView.
+ */
     QChartView* getChartView() const; // Getter do wyświetlenia wykresu w GUI
-
     /**
-     * @brief Zwraca wskaźnik do aktualnej serii danych.
-     * @return QAbstractSeries* seria danych.
-     */
+ * @brief Metoda getSeries.
+ */
     QAbstractSeries* getSeries() const;
-
     /**
-     * @brief Zwraca wskaźnik do osi Y.
-     * @return QValueAxis* oś Y.
-     */
+ * @brief Metoda getAxisY.
+ */
     QValueAxis* getAxisY() const;
-
-    /**
-     * @brief Typy wykresu wspierane przez klasę.
-     */
     enum class ChartType {Line, Scatter};
-
     /**
-     * @brief Zmienia typ wykresu (liniowy lub punktowy).
-     * @param newType Nowy typ wykresu.
-     */
+ * @brief Metoda changeType.
+ */
     void changeType(ChartType newType);
     bool userXRangeActive = false;
-
     /**
-     * @brief Wyłącza ręczne przewijanie wykresu.
-     */
+ * @brief Metoda resetAutoScroll.
+ */
     void resetAutoScroll();
-
     /**
-     * @brief Ustawia kolor linii wykresu.
-     * @param color Kolor.
-     */
+ * @brief Metoda setSeriesColor.
+ */
     void setSeriesColor(const QColor &color);
-
     /**
-     * @brief Ustawia styl i grubość linii.
-     * @param style Styl linii (np. Qt::SolidLine).
-     * @param width Grubość linii.
-     */
+ * @brief Metoda setSeriesStyle.
+ */
     void setSeriesStyle(Qt::PenStyle style, int width);
+    /**
+ * @brief Metoda enableAutoScroll.
+ */
     void enableAutoScroll();
     bool userInteracting = false;
     QTimer *autoScrollTimer = nullptr;
+    /**
+ * @brief Metoda eventFilter.
+ */
     bool eventFilter(QObject *obj, QEvent *event);
+    /**
+ * @brief Metoda setAxisRange.
+ */
     void setAxisRange(double minY, double maxY);
+    /**
+ * @brief Metoda applyEditorSettings.
+ */
     void applyEditorSettings(const QColor &color, Qt::PenStyle style, int width, double minY, double maxY, ChartType type);
 
 private:

@@ -9,6 +9,10 @@
 #include "ChartWidget.h"
 #include "SensorSelectionDialog.h"
 
+/**
+ * @class SettingsDialog
+ * @brief Klasa odpowiedzialna za settingsdialog.
+ */
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
@@ -18,7 +22,13 @@ public:
                             ChartWidget *chartWidgetRef,
                             QWidget *parent = nullptr);
 
+    /**
+ * @brief Metoda getUpdateInterval.
+ */
     int getUpdateInterval() const;
+    /**
+ * @brief Metoda getSelectedSensors.
+ */
     QStringList getSelectedSensors() const;
 
 signals:

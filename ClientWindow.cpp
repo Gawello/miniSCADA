@@ -76,25 +76,17 @@ void ClientWindow::openSettings() {
         qDebug() << "[ClientWindow] OK kliknięte w ustawieniach";
 
         QStringList newSensors = dialog.getSelectedSensors();
-        QString chartToEdit = dialog.getChartToEdit();
         int interval = dialog.getUpdateInterval();
 
         qDebug() << "[ClientWindow] Nowe sensory:" << newSensors;
-        qDebug() << "[ClientWindow] Edytowany wykres:" << chartToEdit;
 
-        // Dodaj nowe czujniki jako wykresy
+        // Dodaj nowe czujniki jako wykresy z domyślnym zakresem i typem
         for (const QString &sensor : newSensors) {
             if (!sensor.isEmpty() && !chartWidget->hasChart(sensor)) {
                 qDebug() << "[ClientWindow] Dodaję nowy wykres:" << sensor;
-                chartWidget->addChart(sensor);
-                // Typ i styl wykresu ustawi użytkownik w ChartEditorDialog
+                chartWidget->addChart(sensor, 0, 100);  // domyślny zakres Y
+                // Typ wykresu i styl zostaną ustawione później przez użytkownika w ChartEditorDialog
             }
-        }
-
-        // Ustaw zakres Y (jeśli wybrano istniejący wykres)
-        if (!chartToEdit.isEmpty() && chartToEdit != " " && chartWidget->hasChart(chartToEdit)) {
-            qDebug() << "[ClientWindow] Ustawiam zakres Y dla wykresu:" << chartToEdit;
-            chartWidget->setAxisRange(chartToEdit);
         }
 
         // Ustaw nowy interwał odświeżania
@@ -104,7 +96,6 @@ void ClientWindow::openSettings() {
         qDebug() << "[ClientWindow] Anulowano okno ustawień";
     }
 }
-
 
 
 QStringList ClientWindow::getUnusedSensors() const {

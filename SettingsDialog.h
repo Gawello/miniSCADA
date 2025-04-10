@@ -2,11 +2,10 @@
 #define SETTINGSDIALOG_H
 
 #include <QDialog>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
-#include <QPushButton>
-#include <QComboBox>
 #include <QFormLayout>
+#include <QSpinBox>
+#include <QPushButton>
+#include <QStringList>
 #include "ChartWidget.h"
 #include "SensorSelectionDialog.h"
 
@@ -18,21 +17,16 @@ public:
                             const QStringList &existingCharts,
                             ChartWidget *chartWidgetRef,
                             QWidget *parent = nullptr);
+
     int getUpdateInterval() const;
-    QStringList getSelectedSensors() const; // Zwraca wybrany nowy czujnik
-    QString getSelectedChartType() const;
-    QComboBox *editChartComboBox;
-    QString getChartToEdit() const;
+    QStringList getSelectedSensors() const;
 
 private:
-    QSpinBox *updateIntervalSpinBox;
-    // QComboBox *sensorComboBox; // Lista dostępnych czujników
-    QComboBox *chartTypeComboBox;
-    ChartWidget *chartWidget;
-    QStringList selectedSensors;
+    QSpinBox *updateIntervalSpinBox = nullptr;
     QStringList availableSensors;
+    QStringList selectedSensors;
 
-
+    ChartWidget *chartWidget = nullptr;
 };
 
 #endif // SETTINGSDIALOG_H
